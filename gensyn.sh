@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 设置版本号
-current_version=20250425007
+current_version=20250425008
 
 # Colors for output
 RED='\033[0;31m'
@@ -114,7 +114,7 @@ function install_node() {
     sed -i '1i # ~/.bashrc: executed by bash(1) for non-login shells.\n\n# If not running interactively, don'\''t do anything\ncase $- in\n    *i*) ;;\n    *) return;;\nesac\n' ~/.bashrc
     screen -S rl_swarm -dm bash -c 'source .venv/bin/activate && ./run_rl_swarm.sh'
 
-	echo "部署完成..."
+	echo "部署完成，运行脚本2启动节点即可..."
 }
 
 # 查看日志
@@ -125,10 +125,7 @@ function view_logs(){
 # 启动节点
 function start_node(){
     cd $HOME/rl-swarm
-    screen -S rl_swarm
-    source .venv/bin/activate
-    ./run_rl_swarm.sh
-	echo "$PROGRAMNAME 节点已启动"
+    screen -S rl_swarm -dm bash -c 'source .venv/bin/activate && ./run_rl_swarm.sh'
 }
 
 # 停止节点

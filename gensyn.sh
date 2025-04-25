@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 设置版本号
-current_version=20250425002
+current_version=20250425004
 
 # Colors for output
 RED='\033[0;31m'
@@ -110,7 +110,7 @@ function install_node() {
     python -m venv .venv
     source .venv/bin/activate
 
-    screen -dmS rl_swarm /bin/bash -c 'source .venv/bin/activate && ./run_rl_swarm.sh'
+    echo "运行命令：rl_swarm /bin/bash -c 'source .venv/bin/activate && ./run_rl_swarm.sh' 启动服务"
 	echo "部署完成..."
 }
 
@@ -122,7 +122,7 @@ function view_logs(){
 # 启动节点
 function start_node(){
     cd $HOME/rl-swarm
-	screen -dmS rl_swarm /bin/bash -c 'source .venv/bin/activate && ./run_rl_swarm.sh'
+	echo "运行命令：rl_swarm /bin/bash -c 'source .venv/bin/activate && ./run_rl_swarm.sh' 启动服务"
 	echo "$PROGRAMNAME 节点已启动"
 }
 

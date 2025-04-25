@@ -10,7 +10,6 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 # Program name
 PROGRAMNAME="gensyn"
-
 update_script() {
     # 指定URL
     update_url="https://raw.githubusercontent.com/breaddog100/$PROGRAMNAME/main/$PROGRAMNAME.sh"
@@ -50,6 +49,8 @@ update_script() {
 
 # 节点安装
 function install_node() {
+
+    export NEEDRESTART_MODE=a
 
     # 定义目标swap大小（单位：GB）
     TARGET_SWAP_GB=32

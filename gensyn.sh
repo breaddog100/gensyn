@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 设置版本号
-current_version=20250425006
+current_version=20250425007
 
 # Colors for output
 RED='\033[0;31m'
@@ -111,11 +111,9 @@ function install_node() {
     source .venv/bin/activate
 
     cd $HOME/rl-swarm
-    screen -S rl_swarm
-    source .venv/bin/activate
-    ./run_rl_swarm.sh
+    sed -i '1i # ~/.bashrc: executed by bash(1) for non-login shells.\n\n# If not running interactively, don'\''t do anything\ncase $- in\n    *i*) ;;\n    *) return;;\nesac\n' ~/.bashrc
+    screen -S rl_swarm -dm bash -c 'source .venv/bin/activate && ./run_rl_swarm.sh'
 
-    echo "运行命令：screen -S rl_swarm /bin/bash -c 'source .venv/bin/activate && ./run_rl_swarm.sh' 启动服务"
 	echo "部署完成..."
 }
 

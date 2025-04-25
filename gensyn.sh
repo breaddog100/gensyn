@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 设置版本号
-current_version=20250425001
+current_version=20250425002
 
 # Colors for output
 RED='\033[0;31m'
@@ -90,28 +90,7 @@ function install_node() {
 
     sudo apt-get update && sudo apt-get upgrade -y
     sudo apt install screen curl iptables build-essential git wget lz4 jq make gcc nano automake autoconf tmux htop nvme-cli libgbm1 pkg-config libssl-dev libleveldb-dev tar clang bsdmainutils ncdu unzip libleveldb-dev  -y
-    # Remove old Docker installations
-    for pkg in docker.io docker-doc docker-compose podman-docker containerd runc; do sudo apt-get remove $pkg; done
-
-    # Add Docker repository
-    sudo apt-get update
-    sudo apt-get install ca-certificates curl gnupg
-    sudo install -m 0755 -d /etc/apt/keyrings
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-    sudo chmod a+r /etc/apt/keyrings/docker.gpg
-
-    echo \
-    "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-    "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
-    sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-    # Install Docker
-    sudo apt-get update
-    sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
-
-    sudo usermod -aG docker $USER
-    sudo apt install software-properties-common -y
-    sudo add-apt-repository ppa:deadsnakes/ppa -y
+    
     sudo apt update
     sudo apt install python3.10 python3.10-venv python3.10-dev -y
     sudo apt install python-is-python3
@@ -131,55 +110,25 @@ function install_node() {
     python -m venv .venv
     source .venv/bin/activate
 
-    PROJECT_DIR=$(pwd)
-
-    sudo tee /etc/systemd/system/$PROGRAMNAME.service << EOF
-[Unit]
-Description=RL Swarm Service
-After=network.target
-Wants=network-online.target
-
-[Service]
-User=$USER
-ExecStart=/bin/bash -c 'source $PROJECT_DIR/.venv/bin/activate && ./run_rl_swarm.sh'
-Restart=always
-RestartSec=5
-LimitNOFILE=65536
-LimitNPROC=4096
-StandardOutput=journal
-StandardError=journal
-SyslogIdentifier=pop-node
-WorkingDirectory=$PROJECT_DIR
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-    sudo systemctl daemon-reload
-    sudo systemctl enable $PROGRAMNAME
-    sudo systemctl start $PROGRAMNAME
+    screen -dmS rl_swarm /bin/bash -c 'source .venv/bin/activate && ./run_rl_swarm.sh'
 	echo "部署完成..."
 }
 
 # 查看日志
 function view_logs(){
-	sudo journalctl -u $PROGRAMNAME.service -f --no-hostname -o short-iso
-}
-
-# 查看状态
-function view_status(){
-	sudo systemctl status $PROGRAMNAME
+	screen -r rl_swarm
 }
 
 # 启动节点
 function start_node(){
-	sudo systemctl start $PROGRAMNAME
+    cd $HOME/rl-swarm
+	screen -dmS rl_swarm /bin/bash -c 'source .venv/bin/activate && ./run_rl_swarm.sh'
 	echo "$PROGRAMNAME 节点已启动"
 }
 
 # 停止节点
 function stop_node(){
-	sudo systemctl stop $PROGRAMNAME
+	screen -S rl_swarm -X quit
 	echo "$PROGRAMNAME 节点已停止"
 }
 
@@ -212,7 +161,7 @@ function main_menu() {
 		echo "最低配置：4C16G100G；推荐配置：8C32G300G；"
 	    echo "请选择要执行的操作:"
 	    echo "1. 部署节点 install_node"
-	    echo "2. 查看状态 view_status"
+	    echo "2. 查看状态 view_logs"
 	    echo "3. 查看日志 view_logs"
 	    echo "4. 停止节点 stop_node"
 	    echo "5. 启动节点 start_node"
@@ -222,7 +171,7 @@ function main_menu() {
 	
 	    case $OPTION in
 	    1) install_node ;;
-	    2) view_status ;;
+	    2) view_logs ;;
 	    3) view_logs ;;
 	    4) stop_node ;;
 	    5) start_node ;;
